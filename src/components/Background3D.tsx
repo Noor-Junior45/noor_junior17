@@ -182,12 +182,15 @@ function InteractivePlanet({ children }: { children: React.ReactNode | ((isDragg
 
 function MainPlanet() {
   const meshRef = useRef<THREE.Mesh>(null);
+  const moonRef = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
+  useFrame(({ clock }) => {
     if (meshRef.current) {
-      // Auto-rotate only if NOT inside an interactive wrapper that overrides it? 
-      // Actually, let's just add a slow base rotation that can be added to user rotation
-      meshRef.current.rotation.y += 0.0005;
+      meshRef.current.rotation.y += 0.002;
+    }
+    if (moonRef.current) {
+      const t = clock.getElapsedTime() * 0.5;
+      moonRef.current.rotation.y = t;
     }
   });
 
@@ -201,25 +204,25 @@ function MainPlanet() {
             floatIntensity={isDragging ? 0 : 2} 
             floatingRange={[-0.5, 0.5]}
           >
+            {/* Main Planet - Perfect Sphere */}
             <mesh ref={meshRef}>
               <sphereGeometry args={[4, 64, 64]} />
-              {/* Use MeshDistortMaterial for a "living" liquid planet surface */}
-              <MeshDistortMaterial
+              <meshStandardMaterial
                 color="#2563eb"
-                roughness={0.4}
-                metalness={0.3}
-                distort={0.3} // Strength of distortion
-                speed={1.5}   // Speed of distortion
+                roughness={0.7}
+                metalness={0.1}
               />
             </mesh>
-            {/* Atmosphere Glow */}
-            <FresnelAtmosphere color="#60a5fa" scale={1.2} opacity={0.8} />
             
-            {/* Orbiting Moon */}
-            <group rotation={[0, 0, Math.PI / 6]}>
-              <mesh position={[6, 0, 0]}>
+            {/* Atmosphere Glow */}
+            <FresnelAtmosphere color="#60a5fa" scale={1.2} opacity={0.6} />
+            
+            {/* Orbiting Moon Container */}
+            <group ref={moonRef}>
+              {/* Moon positioned at radius 7 from center */}
+              <mesh position={[7, 0, 0]}>
                 <sphereGeometry args={[0.8, 32, 32]} />
-                <meshStandardMaterial color="#94a3b8" roughness={0.7} />
+                <meshStandardMaterial color="#e2e8f0" roughness={0.8} />
               </mesh>
             </group>
           </Float>
