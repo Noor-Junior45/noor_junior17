@@ -14,6 +14,7 @@ import {
 import { motion } from 'framer-motion';
 import SocialButton from './components/SocialButton';
 import Background3D from './components/Background3D';
+import { useSoundEffects } from './hooks/useSoundEffects';
 
 // Official Binance Logo Component
 const BinanceIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
@@ -99,44 +100,11 @@ const SnapchatIcon = ({ size = 24, className = "" }: { size?: number, className?
   </svg>
 );
 
-// Sound Effect Hook
-const useSoundEffects = () => {
-  const playHover = () => {
-    const audio = new AudioContext();
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.connect(gain);
-    gain.connect(audio.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(400, audio.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(600, audio.currentTime + 0.1);
-    gain.gain.setValueAtTime(0.05, audio.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.1);
-    osc.start();
-    osc.stop(audio.currentTime + 0.1);
-  };
-
-  const playClick = () => {
-    const audio = new AudioContext();
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.connect(gain);
-    gain.connect(audio.destination);
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(600, audio.currentTime);
-    gain.gain.setValueAtTime(0.1, audio.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.1);
-    osc.start();
-    osc.stop(audio.currentTime + 0.1);
-  };
-
-  return { playHover, playClick };
-};
-
 function App() {
   const { playHover, playClick } = useSoundEffects();
   const links = [
     {
+      id: "link-0",
       icon: Globe,
       label: "New Lucky Pharma",
       username: "newluckypharma.vercel.app",
@@ -145,6 +113,7 @@ function App() {
     },
     // ... (rest of links remain same, just need to pass playHover/playClick if SocialButton supports it, or wrap them)
     {
+      id: "link-1",
       icon: Globe,
       label: "Noor POS",
       username: "noorpos.in",
@@ -152,6 +121,7 @@ function App() {
       color: "bg-blue-500"
     },
     {
+      id: "link-2",
       icon: PayPalIcon,
       label: "PayPal",
       username: "mdhassan1738@gmail.com",
@@ -159,6 +129,7 @@ function App() {
       color: "bg-[#003087]"
     },
     {
+      id: "link-3",
       icon: SteamIcon,
       label: "Steam",
       username: "mdhassan1738@gmail.com",
@@ -166,6 +137,7 @@ function App() {
       color: "bg-[#171a21]"
     },
     {
+      id: "link-4",
       icon: XboxIcon,
       label: "Xbox",
       username: "Junior 45 #8121",
@@ -173,6 +145,7 @@ function App() {
       color: "bg-[#107C10]"
     },
     {
+      id: "link-5",
       icon: DiscordIcon,
       label: "Discord",
       username: "@noor_junior45",
@@ -180,6 +153,7 @@ function App() {
       color: "bg-[#5865F2]"
     },
     {
+      id: "link-6",
       icon: SnapchatIcon,
       label: "Snapchat",
       username: "@noor_junior45",
@@ -187,6 +161,7 @@ function App() {
       color: "bg-[#FFFC00] text-black"
     },
     {
+      id: "link-7",
       icon: Instagram,
       label: "Instagram",
       username: "@noor_junior45",
@@ -194,6 +169,7 @@ function App() {
       color: "bg-pink-500"
     },
     {
+      id: "link-8",
       icon: Facebook,
       label: "Facebook",
       username: "noorjunior45",
@@ -201,6 +177,7 @@ function App() {
       color: "bg-blue-600"
     },
     {
+      id: "link-9",
       icon: Facebook,
       label: "Facebook Channel",
       username: "E N C O U R A G E 》O T H E R s",
@@ -208,6 +185,7 @@ function App() {
       color: "bg-blue-700"
     },
     {
+      id: "link-10",
       icon: Twitter,
       label: "X (Twitter)",
       username: "@noor_junior45",
@@ -215,6 +193,7 @@ function App() {
       color: "bg-black"
     },
     {
+      id: "link-11",
       icon: Linkedin,
       label: "LinkedIn",
       username: "noor_junior45",
@@ -222,6 +201,7 @@ function App() {
       color: "bg-blue-700"
     },
     {
+      id: "link-12",
       icon: Github,
       label: "GitHub",
       username: "@noor_junior45",
@@ -229,6 +209,7 @@ function App() {
       color: "bg-purple-600"
     },
     {
+      id: "link-13",
       icon: Youtube,
       label: "YouTube",
       username: "@noor_junior45",
@@ -236,6 +217,7 @@ function App() {
       color: "bg-red-600"
     },
     {
+      id: "link-14",
       icon: Send,
       label: "Stock Graph",
       username: "Stock Graph",
@@ -243,6 +225,7 @@ function App() {
       color: "bg-sky-500"
     },
     {
+      id: "link-15",
       icon: Send,
       label: "WALLPAPERS",
       username: "WALLPAPERS",
@@ -250,6 +233,7 @@ function App() {
       color: "bg-teal-500"
     },
     {
+      id: "link-16",
       icon: Send,
       label: "Telegram",
       username: "@noor_junior45",
@@ -257,6 +241,7 @@ function App() {
       color: "bg-blue-500"
     },
     {
+      id: "link-17",
       icon: MessageCircle,
       label: "WhatsApp",
       username: "Channel",
@@ -264,6 +249,7 @@ function App() {
       color: "bg-green-500"
     },
     {
+      id: "link-18",
       icon: BinanceIcon,
       label: "Binance",
       username: "noor_junior45",
@@ -271,6 +257,7 @@ function App() {
       color: "bg-yellow-500"
     },
     {
+      id: "link-19",
       icon: Mail,
       label: "Email",
       username: "mdnoor4860@gmail.com",
@@ -279,147 +266,190 @@ function App() {
     }
   ];
 
+  const scrollToRandomLink = () => {
+    const randomIndex = Math.floor(Math.random() * links.length);
+    const targetId = `link-${randomIndex}`;
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      playClick();
+    }
+  };
+
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
-      <Background3D />
+    <div className="min-h-screen relative overflow-x-hidden bg-[#020617] font-sans">
+      <Background3D onSpaceshipClick={scrollToRandomLink} />
       
-      <main className="relative z-10 container mx-auto px-4 py-10 flex flex-col items-center">
+      {/* Game HUD Overlay */}
+      <div className="hud-overlay" />
+      <div className="scanline" />
+      
+      {/* HUD Corners */}
+      <div className="fixed top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-cyan-500/40 z-[110] pointer-events-none" />
+      <div className="fixed top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-cyan-500/40 z-[110] pointer-events-none" />
+      <div className="fixed bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-cyan-500/40 z-[110] pointer-events-none" />
+      <div className="fixed bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-cyan-500/40 z-[110] pointer-events-none" />
+
+      {/* System Status Bar */}
+      <div className="fixed top-6 left-20 right-20 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent z-[110] hidden md:block">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-8 font-mono text-[10px] text-cyan-400/60 tracking-[0.3em] uppercase">
+          <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" /> SYSTEM_ONLINE</span>
+          <span>LATENCY: 24MS</span>
+          <span>PILOT: NOOR_HASSAN</span>
+          <span>SECTOR: 7-MUHARRAM</span>
+        </div>
+      </div>
+
+      <main className="relative z-10 container mx-auto px-4 py-16 flex flex-col items-center">
         {/* Header Section */}
         <motion.div 
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, type: "spring" }}
-          className="text-center mb-8 w-full max-w-sm"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center mb-12 w-full max-w-sm relative"
         >
+          {/* Decorative Ring */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-cyan-500/20 rounded-full animate-[spin_20s_linear_infinite] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 border border-dashed border-cyan-500/10 rounded-full animate-[spin_30s_linear_infinite_reverse] pointer-events-none" />
+
           <div className="relative inline-block mb-6 group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 blur-3xl opacity-40 rounded-full animate-pulse group-hover:opacity-60 transition-opacity" />
-            <div className="w-48 h-48 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.1)] mx-auto overflow-hidden relative z-10">
-               <img 
-                 src="https://lh3.googleusercontent.com/p/AF1QipO3Kk4K7vw_t19yrm-y1Ban3SXBJ7irylAOf1Q-=s1360-w1360-h1020-rw" 
-                 alt="Md Noor Hassan" 
-                 className="w-full h-full object-cover"
-                 referrerPolicy="no-referrer"
-               />
+            <div className="absolute inset-0 bg-cyan-500/20 blur-3xl rounded-full animate-pulse" />
+            <div className="w-44 h-44 rounded-full bg-slate-950 border-2 border-cyan-500/50 flex items-center justify-center shadow-[0_0_50px_rgba(34,211,238,0.2)] mx-auto overflow-hidden relative z-10 p-1">
+               <div className="w-full h-full rounded-full overflow-hidden border border-cyan-500/30">
+                 <img 
+                   src="https://lh3.googleusercontent.com/p/AF1QipO3Kk4K7vw_t19yrm-y1Ban3SXBJ7irylAOf1Q-=s1360-w1360-h1020-rw" 
+                   alt="Md Noor Hassan" 
+                   className="w-full h-full object-cover transition-all duration-500"
+                   referrerPolicy="no-referrer"
+                 />
+               </div>
+               {/* Scanning Line on Image */}
+               <div className="absolute inset-0 bg-cyan-400/10 h-1 w-full top-0 animate-[scanline_4s_linear_infinite] pointer-events-none" />
             </div>
           </div>
         </motion.div>
 
         {/* Name and Tag */}
-        <div className="text-center mb-10 relative z-20">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-wide uppercase drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)] font-display">
+        <div className="text-center mb-16 relative z-20">
+            <motion.h1 
+              initial={{ letterSpacing: "0.1em", opacity: 0 }}
+              animate={{ letterSpacing: "0.3em", opacity: 1 }}
+              transition={{ duration: 1 }}
+              className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(34,211,238,0.5)] font-display"
+            >
                 MD NOOR HASSAN
-            </h1>
-            <div className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs md:text-sm font-semibold tracking-widest uppercase backdrop-blur-md shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-                Student & Developer
+            </motion.h1>
+            <div className="flex items-center justify-center gap-4">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent to-cyan-500/50" />
+              <div className="px-6 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] md:text-xs font-mono font-bold tracking-[0.4em] uppercase backdrop-blur-md">
+                  LEVEL 21 • ARCHITECT
+              </div>
+              <div className="h-px w-12 bg-gradient-to-l from-transparent to-cyan-500/50" />
             </div>
         </div>
           
-        {/* Profile Card / Bio - Claymorphism Style */}
+        {/* Profile Card / Pilot ID */}
         <motion.div 
-          whileHover={{ scale: 1.02, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+          whileHover={{ scale: 1.01 }}
           onMouseEnter={playHover}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 text-blue-100 shadow-[inset_-5px_-5px_15px_rgba(255,255,255,0.05),_inset_5px_5px_15px_rgba(0,0,0,0.2),_0_20px_40px_rgba(0,0,0,0.3)] relative overflow-hidden mb-16 w-full max-w-sm"
+          className="bg-slate-950/60 backdrop-blur-2xl border border-cyan-500/20 rounded-none p-8 text-cyan-100 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden mb-20 w-full max-w-md"
+          style={{
+            clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)"
+          }}
         >
-          {/* Inner Glow */}
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+          {/* Tech Grid Background */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none" 
+               style={{ backgroundImage: 'radial-gradient(circle, #22d3ee 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
           
-          <h2 className="text-3xl md:text-4xl font-arabic text-blue-300 mb-6 drop-shadow-lg text-center" dir="rtl">
-            محمد نور حسن
-          </h2>
+          <div className="flex flex-col items-center mb-8 border-b border-cyan-500/20 pb-4">
+            <div className="text-2xl md:text-4xl text-emerald-400 font-bold tracking-[0.2em] animate-pulse mb-6 drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]">
+              السلام عليكم
+            </div>
+            <div className="flex justify-between items-end w-full">
+              <div className="font-mono text-[10px] text-cyan-500/60 text-left">
+                ID_NO: 4860-MH<br/>
+                STATUS: ACTIVE_DUTY
+              </div>
+              <h2 className="text-3xl font-arabic text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]" dir="rtl">
+                محمد نور حسن
+              </h2>
+            </div>
+          </div>
 
-          <p className="text-sm md:text-base leading-relaxed font-light tracking-wide relative z-10 text-center">
-            <span className="block font-semibold text-blue-400 mb-1 text-lg">College & University</span>
-            <span className="block mb-3 text-white/80">SNU - KOLKATA | BTech in CSE.</span>
+          <div className="space-y-6 font-mono relative z-10">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <span className="text-[9px] text-cyan-500/50 uppercase tracking-tighter">Affiliation</span>
+                <p className="text-xs text-white font-bold tracking-wider">SNU - KOLKATA</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[9px] text-cyan-500/50 uppercase tracking-tighter">Specialization</span>
+                <p className="text-xs text-white font-bold tracking-wider">BTECH CSE</p>
+              </div>
+            </div>
             
-            <span className="block my-4 w-24 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto"></span>
-            
-            <span className="block italic mb-1 text-lg text-emerald-300">السلام عليكم</span>
-            <span className="block text-xs opacity-70 mb-3 font-mono">🎂 27 Feb • 7 Muharram</span>
-            
-            <span className="block mt-4 font-medium text-white/90 italic border-l-2 border-blue-400/50 pl-4 text-left">
-              "We are all remarkable creations of Allah.<br/>Always maintain a smile; it is a Sunnah."
-            </span>
-          </p>
+            <div className="p-4 bg-cyan-500/5 border-l-2 border-cyan-500/50">
+              <p className="text-xs leading-relaxed text-cyan-100/90 italic">
+                "We are all remarkable creations of Allah. Always maintain a smile; it is a Sunnah."
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end pt-4 border-t border-cyan-500/20">
+              <div className="text-[9px] text-cyan-500/40">
+                BOOT_DATE: 27_FEB
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative HUD Elements */}
+          <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 -rotate-45 translate-x-8 -translate-y-8" />
         </motion.div>
 
-        {/* Links Staircase */}
-        <div className="w-full max-w-4xl relative perspective-1000 px-4 pb-10">
-          {/* Central Path Line - Connecting the journey */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500/50 via-purple-500/50 to-green-500/50 transform -translate-x-1/2 -z-10 rounded-full blur-[2px]" />
+        {/* Links Section */}
+        <div className="w-full max-w-4xl relative px-4 pb-20">
+          <div className="flex items-center gap-4 mb-12">
+            <div className="h-px flex-grow bg-gradient-to-r from-transparent to-cyan-500/30" />
+            <h2 className="font-mono text-[10px] text-cyan-500/60 tracking-[0.5em] uppercase">Navigation_Modules</h2>
+            <div className="h-px flex-grow bg-gradient-to-l from-transparent to-cyan-500/30" />
+          </div>
 
-          {links.map((link, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              className="transform transition-all duration-500 relative flex items-center justify-center"
-              style={{ 
-                zIndex: links.length - index,
-                marginBottom: '40px'
-              }}
-              onMouseEnter={playHover}
-              onClick={playClick}
-            >
-              {/* Connecting Branch */}
-              <div 
-                className={`absolute top-1/2 h-0.5 bg-white/20 -z-10 hidden md:block w-16 transition-all duration-500`}
-                style={{ 
-                  left: index % 2 === 0 ? '50%' : 'auto',
-                  right: index % 2 !== 0 ? '50%' : 'auto',
-                  transform: index % 2 === 0 ? 'translateX(0)' : 'translateX(0)',
-                  width: 'calc(50% - 140px)' // Dynamic connector length based on button width approx
-                }}
-              />
-              
-              <div 
-                className="w-full"
-                style={{
-                  transform: `translateX(${index % 2 === 0 ? '-20px' : '20px'})`, // Subtle zigzag
-                }}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {links.map((link, index) => (
+              <motion.div 
+                key={index}
+                id={`link-${index}`}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                onMouseEnter={playHover}
+                onClick={playClick}
               >
-                <SocialButton 
-                  {...link} 
-                  delay={0} // Handled by parent motion.div now
-                />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* End of Page Design Element */}
-        <div className="w-full max-w-xs mx-auto mt-16 mb-8 p-1">
-          <motion.div 
-            animate={{ scaleX: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="relative h-3 bg-gradient-to-r from-transparent via-cyan-400 to-transparent rounded-full overflow-hidden shadow-[0_0_20px_rgba(34,211,238,0.6)]"
-          >
-            <div className="absolute inset-0 bg-white/50 animate-pulse" />
-          </motion.div>
-          
-          <div className="flex justify-center gap-3 mt-3">
-            <motion.div 
-              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
-              className="w-2 h-2 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" 
-            />
-            <motion.div 
-              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-              className="w-2 h-2 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" 
-            />
-            <motion.div 
-              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-              className="w-2 h-2 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" 
-            />
+                <SocialButton {...link} />
+              </motion.div>
+            ))}
           </div>
         </div>
 
+        {/* End of Page Design Element */}
+        <div className="w-full max-w-xs mx-auto mt-24 mb-12 p-1">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="h-px flex-grow bg-cyan-500/20" />
+            <div className="font-mono text-[8px] text-cyan-500/40 tracking-[0.8em]">END_OF_TRANSMISSION</div>
+            <div className="h-px flex-grow bg-cyan-500/20" />
+          </div>
+          
+          <motion.div 
+            animate={{ scaleX: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="relative h-1 bg-cyan-500/30 rounded-full overflow-hidden"
+          />
+        </div>
+
         {/* Footer */}
-        <footer className="w-full text-center py-8 mb-8 text-blue-100 font-medium tracking-wider drop-shadow-md">
-          <p>© 2024 Md Noor Hassan. All rights reserved.</p>
+        <footer className="w-full text-center py-12 text-cyan-500/40 font-mono text-[10px] tracking-[0.3em] uppercase">
+          <p>© 2024 PILOT_NOOR_HASSAN // ALL_RIGHTS_RESERVED</p>
+          <p className="mt-2 text-[8px] opacity-50">ENCRYPTED_CONNECTION_SECURE</p>
         </footer>
       </main>
     </div>

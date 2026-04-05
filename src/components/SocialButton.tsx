@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 
 interface SocialButtonProps {
   icon: any;
@@ -11,10 +12,12 @@ interface SocialButtonProps {
   delay?: number;
 }
 
-export default function SocialButton({ icon: Icon, label, username, href, color = "bg-white", delay = 0 }: SocialButtonProps) {
+const SocialButton = memo(({ icon: Icon, label, username, href, color = "bg-white", delay = 0 }: SocialButtonProps) => {
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
+  const { playClick, playHover } = useSoundEffects();
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    playClick();
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -36,80 +39,80 @@ export default function SocialButton({ icon: Icon, label, username, href, color 
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
+      onMouseEnter={playHover}
       whileHover={{ 
-        scale: 1.05, 
-        rotateX: 5, 
-        rotateY: -5,
-        z: 30,
-        boxShadow: "0px 10px 30px rgba(0,255,255,0.2), 0px -5px 15px rgba(255,255,255,0.1)" 
+        scale: 1.02, 
+        rotateX: 2, 
+        rotateY: -2,
+        z: 20,
+        boxShadow: "0px 0px 30px rgba(34,211,238,0.3), 0px 0px 15px rgba(34,211,238,0.2)" 
       }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.98 }}
       className={`
-        relative group flex items-center p-4 mb-6
-        backdrop-blur-md border border-white/10
-        shadow-[0_0_15px_rgba(0,0,0,0.5)]
-        hover:shadow-[0_0_25px_rgba(0,255,255,0.4)]
-        transition-all duration-300 ease-out
-        w-full max-w-sm mx-auto
-        overflow-visible
-        bg-gradient-to-r from-slate-900/80 to-slate-800/80
+        relative group flex items-center p-4 mb-4
+        backdrop-blur-md border border-cyan-500/30
+        shadow-[0_0_20px_rgba(0,0,0,0.8)]
+        hover:border-cyan-400
+        transition-all duration-200 ease-out
+        w-full max-w-md mx-auto
+        overflow-hidden
+        bg-slate-950/80
+        glitch-hover
       `}
       style={{
         transformStyle: "preserve-3d",
         perspective: "1000px",
-        clipPath: "polygon(5% 0, 95% 0, 100% 20%, 100% 80%, 95% 100%, 5% 100%, 0 80%, 0 20%)", // Octagonal/Sci-fi shape
-        borderRadius: "4px"
+        clipPath: "polygon(0 0, 100% 0, 100% 70%, 95% 100%, 0 100%)", // Tech-cut corner
       }}
     >
-      {/* Engine Glow (Bottom) */}
-      <div className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-cyan-400 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* Scanning Line Effect */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent h-1/2 w-full -translate-y-full group-hover:translate-y-[200%] transition-transform duration-1000 ease-in-out" />
 
-      {/* Tech Lines Overlay */}
-      <div className="absolute inset-0 pointer-events-none border-t border-b border-white/5" />
-      <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-white/10" />
-      <div className="absolute right-0 top-1/4 bottom-1/4 w-1 bg-white/10" />
+      {/* Side Accent */}
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 group-hover:bg-cyan-400 transition-colors" />
 
       {/* Floating Content Wrapper */}
-      <motion.div 
-        className="flex items-center w-full relative z-10"
-        animate={{ 
-          y: [0, -4, 0],
-          rotateZ: [0, 1, -1, 0] // Slight wobble like a hovering ship
-        }}
-        transition={{ 
-          duration: 5, 
-          repeat: Infinity, 
-          ease: "easeInOut",
-          delay: Math.random() * 2 
-        }}
-      >
-        {/* Icon Container - "Cockpit" */}
+      <div className="flex items-center w-full relative z-10">
+        {/* Icon Container - "Module" */}
         <div className={`
-          flex-shrink-0 w-12 h-12 flex items-center justify-center
-          ${color} bg-opacity-20
+          flex-shrink-0 w-14 h-14 flex items-center justify-center
+          ${color} bg-opacity-10
           text-white
-          mr-4
-          group-hover:scale-110 group-hover:rotate-12 transition-all duration-300
-          relative overflow-hidden
-          border border-white/20
-          rounded-lg
-        `}>
-          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
-          <Icon size={24} strokeWidth={2} className="relative z-10 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" />
+          mr-5
+          group-hover:scale-105 transition-all duration-300
+          relative
+          border border-white/10
+          clip-path-polygon-[0%_0%,100%_0%,100%_100%,20%_100%,0%_80%]
+        `}
+        style={{
+          clipPath: "polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%)"
+        }}>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+          <Icon size={28} strokeWidth={1.5} className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
         </div>
 
         {/* Text Content */}
         <div className="flex-grow text-left">
-          <h3 className="font-display font-bold text-lg text-white tracking-widest uppercase group-hover:text-cyan-300 transition-colors drop-shadow-sm">
-            {label}
-          </h3>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-display font-bold text-lg text-white tracking-[0.2em] uppercase group-hover:text-cyan-300 transition-colors">
+              {label}
+            </h3>
+            <span className="font-mono text-[8px] text-cyan-500/50 uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+              [ ACCESS_GRANTED ]
+            </span>
+          </div>
           {username && (
-            <p className="font-mono text-[10px] text-cyan-200/70 group-hover:text-cyan-100 transition-colors tracking-wider">
+            <p className="font-mono text-[11px] text-slate-400 group-hover:text-cyan-200 transition-colors tracking-widest flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-cyan-500/40 rounded-full animate-pulse" />
               {username}
             </p>
           )}
         </div>
-      </motion.div>
+      </div>
+
+      {/* Decorative HUD Corners (Inside Button) */}
+      <div className="absolute top-1 right-1 w-2 h-2 border-t border-r border-cyan-500/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute bottom-1 left-1 w-2 h-2 border-b border-l border-cyan-500/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       {/* Ripple Effect */}
       <AnimatePresence>
@@ -133,4 +136,6 @@ export default function SocialButton({ icon: Icon, label, username, href, color 
       </AnimatePresence>
     </motion.a>
   );
-}
+});
+
+export default SocialButton;

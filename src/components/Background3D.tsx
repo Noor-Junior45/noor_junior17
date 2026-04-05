@@ -378,31 +378,6 @@ function OrangePlanet() {
   );
 }
 
-function Asteroid({ position, scale = 1 }: { position: [number, number, number], scale?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const rotationSpeed = useRef({
-    x: (Math.random() - 0.5) * 0.02,
-    y: (Math.random() - 0.5) * 0.02,
-    z: (Math.random() - 0.5) * 0.02
-  });
-
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += rotationSpeed.current.x;
-      meshRef.current.rotation.y += rotationSpeed.current.y;
-      meshRef.current.rotation.z += rotationSpeed.current.z;
-    }
-  });
-
-  return (
-    <Float speed={1} rotationIntensity={0.5} floatIntensity={0.5}>
-      <mesh ref={meshRef} position={position} scale={[scale, scale, scale]}>
-        <dodecahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color="#4b5563" roughness={0.8} metalness={0.2} flatShading />
-      </mesh>
-    </Float>
-  );
-}
 
 // --- Nature / Earth Components ---
 
@@ -791,40 +766,11 @@ function Satellite() {
   );
 }
 
-function AsteroidBelt({ count = 40, radius = 25, width = 8 }: { count?: number, radius?: number, width?: number }) {
-  const asteroids = useMemo(() => {
-    const items = [];
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const r = radius + (Math.random() - 0.5) * width;
-      const x = Math.cos(angle) * r;
-      const z = Math.sin(angle) * r;
-      const y = (Math.random() - 0.5) * 6; // Spread vertically
-      const scale = 0.4 + Math.random() * 0.8;
-      items.push({ position: [x, y, z] as [number, number, number], scale });
-    }
-    return items;
-  }, [count, radius, width]);
 
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += 0.0005; // Slow rotation of the belt
-    }
-  });
-
-  return (
-    <group ref={groupRef} rotation={[0.3, 0, 0.1]} position={[0, -5, -10]}> {/* Tilt and position the belt */}
-      {asteroids.map((data, i) => (
-        <Asteroid key={i} position={data.position} scale={data.scale} />
-      ))}
-    </group>
-  );
-}
-
-function Spaceship() {
+function Spaceship({ onClick }: { onClick?: () => void }) {
   const groupRef = useRef<THREE.Group>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -863,9 +809,32 @@ function Spaceship() {
   });
 
   return (
-    <group ref={groupRef}>
+    <group 
+      ref={groupRef}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
+      onPointerOver={() => {
+        setHovered(true);
+        document.body.style.cursor = 'pointer';
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        document.body.style.cursor = 'auto';
+      }}
+    >
       {/* Spaceship Model */}
-      <group rotation={[0, Math.PI, 0]} scale={0.5}>
+      <group rotation={[0, Math.PI, 0]} scale={hovered ? 0.6 : 0.5}>
+        {/* Call to Action Prompt */}
+        <Html position={[0, 4, 0]} center distanceFactor={15}>
+          <div className="pointer-events-none select-none flex flex-col items-center gap-1">
+            <div className="bg-cyan-500/20 backdrop-blur-md border border-cyan-500/40 px-3 py-1 rounded-sm text-[8px] text-cyan-300 font-mono animate-pulse whitespace-nowrap uppercase tracking-[0.3em] shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+              [ INTERACT_TO_WARP ]
+            </div>
+            <div className="w-px h-6 bg-gradient-to-b from-cyan-500/50 to-transparent" />
+          </div>
+        </Html>
         {/* Main Body */}
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <coneGeometry args={[1, 4, 8]} />
@@ -957,45 +926,8 @@ function Rain() {
   );
 }
 
-function FallingStar() {
-  const ref = useRef<THREE.Group>(null);
-  const [active, setActive] = useState(false);
-  
-  useFrame(({ clock }) => {
-    if (active && ref.current) {
-      ref.current.position.x -= 1.5;
-      ref.current.position.y -= 1.0;
-      
-      if (ref.current.position.y < -50) {
-        setActive(false);
-      }
-    } else if (!active && Math.random() < 0.005) { // Random spawn chance
-      setActive(true);
-      if (ref.current) {
-        // Spawn in background, behind buttons
-        ref.current.position.set(30 + Math.random() * 20, 40 + Math.random() * 20, -40 - Math.random() * 20);
-      }
-    }
-  });
 
-  return (
-    <group ref={ref} visible={active}>
-      <Trail width={6} length={20} color="#a5f3fc" attenuation={(t) => t * t}>
-        <mesh>
-          <sphereGeometry args={[0.4]} />
-          <meshBasicMaterial color="#ffffff" toneMapped={false} />
-        </mesh>
-      </Trail>
-      {/* Glow Head */}
-      <mesh scale={[2, 2, 2]}>
-        <sphereGeometry args={[0.4]} />
-        <meshBasicMaterial color="#a5f3fc" transparent opacity={0.5} blending={THREE.AdditiveBlending} />
-      </mesh>
-    </group>
-  );
-}
-
-export default function Background3D() {
+export default function Background3D({ onSpaceshipClick }: { onSpaceshipClick?: () => void }) {
   return (
     <>
       <div className="fixed inset-0 -z-10">
@@ -1020,8 +952,6 @@ export default function Background3D() {
             <Stars radius={100} depth={50} count={6000} factor={4} saturation={0} fade speed={1} />
             <Sparkles count={200} scale={30} size={2} speed={0.4} opacity={0.5} color="#ffffff" />
             
-            {/* Asteroid Belt */}
-            <AsteroidBelt />
             <Satellite />
           </group>
 
@@ -1054,12 +984,14 @@ export default function Background3D() {
       
       {/* Foreground Overlay Canvas for Spaceship and Falling Star */}
       <div className="fixed inset-0 z-50 pointer-events-none">
-        <Canvas transparent>
+        <Canvas 
+          style={{ pointerEvents: 'none' }} 
+          eventSource={typeof document !== 'undefined' ? document.body : undefined}
+        >
           <PerspectiveCamera makeDefault position={[0, 0, 15]} />
           <ambientLight intensity={1} />
           <pointLight position={[10, 10, 10]} intensity={1} />
-          <Spaceship />
-          <FallingStar />
+          <Spaceship onClick={onSpaceshipClick} />
         </Canvas>
       </div>
     </>
