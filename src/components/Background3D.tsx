@@ -767,64 +767,148 @@ function Satellite() {
 }
 
 
-function Spaceship({ onClick }: { onClick?: () => void }) {
+// --- Game Components ---
+
+function Ring({ position, onPass, onHit }: { position: [number, number, number], onPass: () => void, onHit: () => void }) {
+  const ref = useRef<THREE.Group>(null);
+  const [passed, setPassed] = useState(false);
+
+  useFrame((state) => {
+    if (!ref.current) return;
+    ref.current.position.z += 0.2; // Move ring towards camera
+
+    // Check if ring passed the spaceship (which is roughly at z=5-10)
+    if (!passed && ref.current.position.z > 15) {
+      setPassed(true);
+      // We'll handle scoring in the parent to check if spaceship was inside the ring
+    }
+
+    // Reset ring if it goes too far
+    if (ref.current.position.z > 20) {
+      ref.current.position.z = -100;
+      ref.current.position.x = (Math.random() - 0.5) * 20;
+      ref.current.position.y = (Math.random() - 0.5) * 10;
+      setPassed(false);
+    }
+  });
+
+  return (
+    <group ref={ref} position={position}>
+      <mesh rotation={[0, 0, 0]}>
+        <torusGeometry args={[2, 0.1, 16, 32]} />
+        <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={2} transparent opacity={0.6} />
+      </mesh>
+      {/* Inner glow for better visibility */}
+      <mesh rotation={[0, 0, 0]}>
+        <torusGeometry args={[1.9, 0.05, 8, 16]} />
+        <meshBasicMaterial color="#a5f3fc" transparent opacity={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+function Spaceship({ onClick, onScoreUpdate, onPositionUpdate }: { 
+  onClick?: () => void, 
+  onScoreUpdate: (score: number | ((s: number) => number)) => void,
+  onPositionUpdate: (pos: { x: number, y: number }) => void 
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
+  const ringsRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
-    const handleMove = (e: MouseEvent) => {
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      
       setMousePos({
-        x: (e.clientX / window.innerWidth) * 2 - 1,
-        y: -(e.clientY / window.innerHeight) * 2 + 1
+        x: (clientX / window.innerWidth) * 2 - 1,
+        y: -(clientY / window.innerHeight) * 2 + 1
       });
     };
     window.addEventListener('mousemove', handleMove);
-    return () => window.removeEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('touchmove', handleMove);
+    };
   }, []);
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
       const t = clock.getElapsedTime();
       
-      // Base movement (figure 8)
-      const x = Math.sin(t * 0.5) * 8;
-      const y = Math.cos(t * 0.3) * 4;
-      const z = Math.sin(t * 0.4) * 5 + 5; // Move in/out
-
-      // Mouse influence
-      const targetX = x + mousePos.x * 5;
-      const targetY = y + mousePos.y * 5;
+      // Mouse influence - more direct control for "game" feel
+      const targetX = mousePos.x * 15;
+      const targetY = mousePos.y * 10;
       
       // Smooth follow
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.05);
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.05);
-      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, z, 0.05);
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
+      groupRef.current.position.z = 10; // Fixed depth for gameplay
 
-      // Rotation based on movement
-      groupRef.current.rotation.z = -mousePos.x * 0.5;
-      groupRef.current.rotation.x = mousePos.y * 0.5;
-      groupRef.current.rotation.y = Math.sin(t * 0.5) * 0.2;
+      // Rotation based on movement (banking)
+      groupRef.current.rotation.z = -mousePos.x * 0.8;
+      groupRef.current.rotation.x = mousePos.y * 0.4;
+      groupRef.current.rotation.y = Math.PI + mousePos.x * 0.2;
+
+      onPositionUpdate({ x: groupRef.current.position.x, y: groupRef.current.position.y });
+
+      // Collision Detection with Rings
+      if (ringsRef.current) {
+        ringsRef.current.children.forEach((ring: any) => {
+          const distance = groupRef.current!.position.distanceTo(ring.position);
+          
+          // If ring is at the same depth as spaceship
+          if (Math.abs(ring.position.z - groupRef.current!.position.z) < 1) {
+            if (distance < 2) {
+              // Passed through ring!
+              if (!ring.userData.scored) {
+                onScoreUpdate(s => s + 1);
+                ring.userData.scored = true;
+              }
+            } else if (distance < 3) {
+              // Hit the ring edge!
+              onScoreUpdate(0);
+            }
+          }
+          
+          // Reset scored flag when ring resets
+          if (ring.position.z < -90) {
+            ring.userData.scored = false;
+          }
+        });
+      }
     }
   });
 
   return (
-    <group 
-      ref={groupRef}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-      onPointerOver={() => {
-        setHovered(true);
-        document.body.style.cursor = 'pointer';
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        document.body.style.cursor = 'auto';
-      }}
-    >
-      {/* Spaceship Model */}
+    <>
+      <group ref={ringsRef}>
+        <Ring position={[0, 0, -20]} onPass={() => {}} onHit={() => {}} />
+        <Ring position={[5, 3, -40]} onPass={() => {}} onHit={() => {}} />
+        <Ring position={[-5, -2, -60]} onPass={() => {}} onHit={() => {}} />
+        <Ring position={[2, -4, -80]} onPass={() => {}} onHit={() => {}} />
+        <Ring position={[-8, 2, -100]} onPass={() => {}} onHit={() => {}} />
+      </group>
+
+      <group 
+        ref={groupRef}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+        onPointerOver={() => {
+          setHovered(true);
+          document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = 'auto';
+        }}
+      >
+      {/* Spaceship Model - 90s Star Wars Style (X-Wing silhouette) */}
       <group rotation={[0, Math.PI, 0]} scale={hovered ? 0.6 : 0.5}>
         {/* Call to Action Prompt */}
         <Html position={[0, 4, 0]} center distanceFactor={15}>
@@ -835,52 +919,101 @@ function Spaceship({ onClick }: { onClick?: () => void }) {
             <div className="w-px h-6 bg-gradient-to-b from-cyan-500/50 to-transparent" />
           </div>
         </Html>
-        {/* Main Body */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <coneGeometry args={[1, 4, 8]} />
-          <meshStandardMaterial color="#e2e8f0" metalness={0.8} roughness={0.2} />
+
+        {/* Main Fuselage (Body) */}
+        <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.4, 0.6, 5, 6]} />
+          <meshStandardMaterial color="#d1d5db" flatShading metalness={0.5} roughness={0.5} />
         </mesh>
+
+        {/* Nose Cone */}
+        <mesh position={[0, 0, 3]} rotation={[Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[0.4, 1.5, 6]} />
+          <meshStandardMaterial color="#9ca3af" flatShading />
+        </mesh>
+
         {/* Cockpit */}
-        <mesh position={[0, 0.5, 0.8]}>
-          <capsuleGeometry args={[0.4, 1, 4, 8]} />
-          <meshStandardMaterial color="#3b82f6" metalness={0.9} roughness={0.1} />
+        <mesh position={[0, 0.4, 0.5]} rotation={[Math.PI / 2, 0, 0]}>
+          <boxGeometry args={[0.5, 1, 0.4]} />
+          <meshStandardMaterial color="#1e293b" flatShading />
         </mesh>
-        {/* Wings */}
-        <mesh position={[1.5, -1, 0]} rotation={[0, 0, -0.5]}>
-          <boxGeometry args={[2, 0.2, 1.5]} />
-          <meshStandardMaterial color="#94a3b8" metalness={0.6} />
-        </mesh>
-        <mesh position={[-1.5, -1, 0]} rotation={[0, 0, 0.5]}>
-          <boxGeometry args={[2, 0.2, 1.5]} />
-          <meshStandardMaterial color="#94a3b8" metalness={0.6} />
-        </mesh>
-        {/* Engines */}
-        <mesh position={[1, -1.5, 0.5]}>
-          <cylinderGeometry args={[0.3, 0.5, 1.5, 8]} />
-          <meshStandardMaterial color="#475569" />
-        </mesh>
-        <mesh position={[-1, -1.5, 0.5]}>
-          <cylinderGeometry args={[0.3, 0.5, 1.5, 8]} />
-          <meshStandardMaterial color="#475569" />
-        </mesh>
-        {/* Engine Glow */}
-        <mesh position={[1, -2.3, 0.5]}>
-          <sphereGeometry args={[0.25]} />
-          <meshBasicMaterial color="#0ea5e9" />
-        </mesh>
-        <mesh position={[-1, -2.3, 0.5]}>
-          <sphereGeometry args={[0.25]} />
-          <meshBasicMaterial color="#0ea5e9" />
-        </mesh>
+
+        {/* Wings (X-Configuration) */}
+        {/* Top Right */}
+        <group rotation={[0, 0, Math.PI / 6]} position={[1.5, 0.8, -0.5]}>
+          <mesh>
+            <boxGeometry args={[3, 0.1, 1.5]} />
+            <meshStandardMaterial color="#d1d5db" flatShading />
+          </mesh>
+          <mesh position={[1.5, 0, 0.5]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 2, 4]} />
+            <meshStandardMaterial color="#ef4444" flatShading />
+          </mesh>
+        </group>
+
+        {/* Top Left */}
+        <group rotation={[0, 0, -Math.PI / 6]} position={[-1.5, 0.8, -0.5]}>
+          <mesh>
+            <boxGeometry args={[3, 0.1, 1.5]} />
+            <meshStandardMaterial color="#d1d5db" flatShading />
+          </mesh>
+          <mesh position={[-1.5, 0, 0.5]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 2, 4]} />
+            <meshStandardMaterial color="#ef4444" flatShading />
+          </mesh>
+        </group>
+
+        {/* Bottom Right */}
+        <group rotation={[0, 0, -Math.PI / 6]} position={[1.5, -0.8, -0.5]}>
+          <mesh>
+            <boxGeometry args={[3, 0.1, 1.5]} />
+            <meshStandardMaterial color="#d1d5db" flatShading />
+          </mesh>
+          <mesh position={[1.5, 0, 0.5]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 2, 4]} />
+            <meshStandardMaterial color="#ef4444" flatShading />
+          </mesh>
+        </group>
+
+        {/* Bottom Left */}
+        <group rotation={[0, 0, Math.PI / 6]} position={[-1.5, -0.8, -0.5]}>
+          <mesh>
+            <boxGeometry args={[3, 0.1, 1.5]} />
+            <meshStandardMaterial color="#d1d5db" flatShading />
+          </mesh>
+          <mesh position={[-1.5, 0, 0.5]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 2, 4]} />
+            <meshStandardMaterial color="#ef4444" flatShading />
+          </mesh>
+        </group>
+
+        {/* Engines and Glows */}
+        {[
+          [1, 0.5, -2.5], [-1, 0.5, -2.5], [1, -0.5, -2.5], [-1, -0.5, -2.5]
+        ].map((pos, i) => (
+          <group key={i} position={pos as [number, number, number]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.3, 0.3, 1, 6]} />
+              <meshStandardMaterial color="#4b5563" flatShading />
+            </mesh>
+            <mesh position={[0, 0, -0.6]}>
+              <sphereGeometry args={[0.2, 8, 8]} />
+              <meshBasicMaterial color="#f87171" />
+            </mesh>
+            <pointLight distance={3} intensity={2} color="#ef4444" />
+          </group>
+        ))}
+
         {/* Trail */}
-        <Trail width={2} length={8} color="#0ea5e9" attenuation={(t) => t * t}>
-           <mesh position={[0, -2, 0]}>
+        <Trail width={1.5} length={10} color="#ef4444" attenuation={(t) => t * t}>
+           <mesh position={[0, 0, -2.5]}>
              <sphereGeometry args={[0.1]} />
              <meshBasicMaterial color="transparent" opacity={0} />
            </mesh>
         </Trail>
       </group>
     </group>
+    </>
   );
 }
 
@@ -927,7 +1060,11 @@ function Rain() {
 }
 
 
-export default function Background3D({ onSpaceshipClick }: { onSpaceshipClick?: () => void }) {
+export default function Background3D({ onSpaceshipClick, onScoreUpdate, onPositionUpdate }: { 
+  onSpaceshipClick?: () => void,
+  onScoreUpdate: (score: number | ((s: number) => number)) => void,
+  onPositionUpdate: (pos: { x: number, y: number }) => void 
+}) {
   return (
     <>
       <div className="fixed inset-0 -z-10">
@@ -991,7 +1128,11 @@ export default function Background3D({ onSpaceshipClick }: { onSpaceshipClick?: 
           <PerspectiveCamera makeDefault position={[0, 0, 15]} />
           <ambientLight intensity={1} />
           <pointLight position={[10, 10, 10]} intensity={1} />
-          <Spaceship onClick={onSpaceshipClick} />
+          <Spaceship 
+            onClick={onSpaceshipClick} 
+            onScoreUpdate={onScoreUpdate}
+            onPositionUpdate={onPositionUpdate}
+          />
         </Canvas>
       </div>
     </>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   Instagram, 
   Facebook, 
@@ -102,6 +103,10 @@ const SnapchatIcon = ({ size = 24, className = "" }: { size?: number, className?
 
 function App() {
   const { playHover, playClick } = useSoundEffects();
+  const [score, setScore] = useState(0);
+  const [altitude, setAltitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+
   const links = [
     {
       id: "link-0",
@@ -278,7 +283,14 @@ function App() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden bg-[#020617] font-sans">
-      <Background3D onSpaceshipClick={scrollToRandomLink} />
+      <Background3D 
+        onSpaceshipClick={scrollToRandomLink} 
+        onScoreUpdate={setScore}
+        onPositionUpdate={(pos) => {
+          setAltitude(Math.round(pos.y * 100));
+          setLongitude(Math.round(pos.x * 100));
+        }}
+      />
       
       {/* Game HUD Overlay */}
       <div className="hud-overlay" />
@@ -294,9 +306,10 @@ function App() {
       <div className="fixed top-6 left-20 right-20 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent z-[110] hidden md:block">
         <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-8 font-mono text-[10px] text-cyan-400/60 tracking-[0.3em] uppercase">
           <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" /> SYSTEM_ONLINE</span>
-          <span>LATENCY: 24MS</span>
+          <span>SCORE: {score}</span>
+          <span>ALT: {altitude}M</span>
+          <span>LON: {longitude}M</span>
           <span>PILOT: NOOR_HASSAN</span>
-          <span>SECTOR: 7-MUHARRAM</span>
         </div>
       </div>
 
