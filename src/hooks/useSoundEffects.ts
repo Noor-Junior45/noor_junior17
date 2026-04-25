@@ -1,9 +1,18 @@
 import { useCallback } from 'react';
 
+let audioCtx: AudioContext | null = null;
+
+const getAudioContext = () => {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  return audioCtx;
+};
+
 export const useSoundEffects = () => {
   const playHover = useCallback(() => {
     try {
-      const audio = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audio = getAudioContext();
       const osc = audio.createOscillator();
       const gain = audio.createGain();
       osc.connect(gain);
@@ -22,7 +31,7 @@ export const useSoundEffects = () => {
 
   const playClick = useCallback(() => {
     try {
-      const audio = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audio = getAudioContext();
       const osc = audio.createOscillator();
       const gain = audio.createGain();
       osc.connect(gain);

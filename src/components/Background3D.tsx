@@ -25,25 +25,25 @@ function BlackHole() {
     <group position={[15, 10, -20]} rotation={[0.4, -0.2, 0]} scale={[1.2, 1.2, 1.2]}>
        {/* Event Horizon (The Black Hole) */}
        <mesh>
-         <sphereGeometry args={[2, 64, 64]} />
+         <sphereGeometry args={[2, 32, 32]} />
          <meshBasicMaterial color="#000000" />
        </mesh>
        
        {/* Accretion Disk - Main Bright Ring */}
        <mesh ref={diskRef} rotation={[Math.PI / 2, 0, 0]}>
-         <torusGeometry args={[3.5, 0.8, 2, 100]} />
+         <torusGeometry args={[3.5, 0.8, 2, 32]} />
          <meshBasicMaterial color="#fb923c" side={THREE.DoubleSide} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
        </mesh>
        
        {/* Outer Glow / Lensing */}
        <mesh ref={glowRef} rotation={[Math.PI / 2, 0, 0]}>
-         <ringGeometry args={[2.1, 6, 64]} />
+         <ringGeometry args={[2.1, 6, 32]} />
          <meshBasicMaterial color="#c2410c" side={THREE.DoubleSide} transparent opacity={0.15} blending={THREE.AdditiveBlending} />
        </mesh>
 
        {/* Vertical Lensing Ring (Interstellar effect) */}
        <mesh rotation={[0, 0, 0]}>
-          <torusGeometry args={[3.6, 0.1, 16, 100]} />
+          <torusGeometry args={[3.6, 0.1, 8, 32]} />
           <meshBasicMaterial color="#fdba74" transparent opacity={0.4} blending={THREE.AdditiveBlending} />
        </mesh>
     </group>
@@ -240,7 +240,7 @@ function MainPlanet() {
           >
             {/* Main Planet - Perfect Sphere */}
             <mesh ref={meshRef}>
-              <sphereGeometry args={[4, 64, 64]} />
+              <sphereGeometry args={[4, 32, 32]} />
               <meshStandardMaterial
                 color={isActive ? "#3b82f6" : "#2563eb"} // Brighter when active
                 roughness={0.7}
@@ -281,13 +281,13 @@ function IcePlanet() {
       <Float speed={2} rotationIntensity={1.2} floatIntensity={1}>
         <group position={[8, -25, -35]}>
           <mesh ref={meshRef}>
-            <sphereGeometry args={[3, 64, 64]} />
-            <meshPhysicalMaterial 
+            <sphereGeometry args={[3, 32, 32]} />
+            <meshStandardMaterial 
               color="#a5f3fc" 
               roughness={0.1} 
               metalness={0.1} 
-              transmission={0.2} // Slight transparency for ice
-              thickness={2}
+              transparent={true}
+              opacity={0.8}
             />
           </mesh>
           {/* Ice Rings */}
@@ -315,7 +315,7 @@ function RedPlanet() {
       <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
         <group position={[-10, -15, -25]}>
           <mesh ref={meshRef}>
-            <sphereGeometry args={[2.5, 64, 64]} />
+            <sphereGeometry args={[2.5, 32, 32]} />
             {/* Wobble for heat haze / active surface */}
             <MeshWobbleMaterial 
               color="#ef4444" 
@@ -342,7 +342,7 @@ function PurplePlanet() {
       <Float speed={1.2} rotationIntensity={0.8} floatIntensity={0.8}>
         <group position={[12, -45, -50]}>
           <mesh ref={meshRef}>
-            <sphereGeometry args={[4, 64, 64]} />
+            <sphereGeometry args={[4, 32, 32]} />
             <MeshDistortMaterial 
               color="#8b5cf6" 
               roughness={0.5} 
@@ -368,7 +368,7 @@ function OrangePlanet() {
       <Float speed={1.5} rotationIntensity={0.6} floatIntensity={0.6}>
         <group position={[-15, -60, -70]}>
           <mesh ref={meshRef}>
-            <sphereGeometry args={[5, 64, 64]} />
+            <sphereGeometry args={[5, 32, 32]} />
             <meshStandardMaterial color="#f97316" roughness={0.8} metalness={0.2} />
           </mesh>
           <FresnelAtmosphere color="#fdba74" scale={1.15} opacity={0.4} />
@@ -570,7 +570,7 @@ function EarthSphere() {
     <group position={[0, -170, -10]}>
       <mesh rotation={[0, 0, 0]}>
         {/* Reduced radius from 80 to 40 for a smaller "tiny planet" look */}
-        <sphereGeometry args={[40, 128, 128]} />
+        <sphereGeometry args={[40, 64, 64]} />
         <shaderMaterial 
           vertexShader={vertexShader}
           fragmentShader={fragmentShader}
@@ -579,7 +579,7 @@ function EarthSphere() {
       </mesh>
       {/* Outer Atmosphere Glow */}
       <mesh scale={[42, 42, 42]}>
-        <sphereGeometry args={[1, 64, 64]} />
+        <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial color="#4fa1ff" transparent opacity={0.15} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
       </mesh>
       {/* Stronger Rim Light via FresnelAtmosphere component if needed, but meshBasicMaterial above gives a nice volumetric haze */}
@@ -589,25 +589,14 @@ function EarthSphere() {
 }
 
 function Trees() {
-  const count = 40; // Reduced tree count for smaller planet
+  const count = 15; // Drastically reduced for performance
   const trees = useMemo(() => {
     const items = [];
     for (let i = 0; i < count; i++) {
-      // Spawn trees on the top surface of the smaller sphere
-      // Sphere center is at [0, -170, -10], Radius is 40.
-      // Top surface is around Y = -130.
-      
-      // We want them scattered around the very top "cap" of the sphere
       const angle = Math.random() * Math.PI * 2;
-      // Smaller radius for tree spread to keep them on the "island"
       const r = Math.random() * 15; 
-      
       const x = Math.sin(angle) * r;
-      const z = -10 + Math.cos(angle) * r; // Offset by sphere Z position
-      
-      // Height adjustment: Top of sphere is at -130 (center Y + radius)
-      // We need to place them slightly lower as we move away from center (curvature)
-      // Simple approximation: y = -130 - (distance from center)^2 / (2 * radius)
+      const z = -10 + Math.cos(angle) * r;
       const dist = Math.sqrt(x*x + (z+10)*(z+10));
       const y = -130 - (dist * dist) / (2 * 40);
 
@@ -693,129 +682,22 @@ function SceneController() {
 }
 
 function Fireflies() {
-  const count = 50;
-  const positions = useMemo(() => {
-    const pos = [];
-    for (let i = 0; i < count; i++) {
-      pos.push([
-        (Math.random() - 0.5) * 100,
-        -110 + Math.random() * 10,
-        -20 + (Math.random() - 0.5) * 50
-      ]);
-    }
-    return pos;
-  }, []);
-
   return (
-    <group>
-      {positions.map((pos, i) => (
-        <Float key={i} speed={1 + Math.random()} rotationIntensity={0} floatIntensity={2}>
-          <mesh position={pos as [number, number, number]}>
-            <sphereGeometry args={[0.1, 8, 8]} />
-            <meshBasicMaterial color="#fbbf24" transparent opacity={0.8} />
-          </mesh>
-        </Float>
-      ))}
+    <group position={[0, -105, -20]}>
+      <Sparkles count={50} scale={100} size={4} speed={0.5} opacity={0.8} color="#fbbf24" noise={1} />
     </group>
   );
 }
-
-function Satellite() {
-  const groupRef = useRef<THREE.Group>(null);
-  
-  useFrame(({ clock }) => {
-    if (groupRef.current) {
-      const t = clock.getElapsedTime() * 0.2;
-      // Orbit path
-      groupRef.current.position.x = Math.sin(t) * 25;
-      groupRef.current.position.z = Math.cos(t) * 10 - 10;
-      groupRef.current.position.y = Math.cos(t * 0.5) * 5 + 10;
-      
-      // Rotation
-      groupRef.current.rotation.y += 0.01;
-      groupRef.current.rotation.z = Math.sin(t) * 0.2;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {/* Main Body */}
-      <mesh>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#fbbf24" metalness={0.8} roughness={0.2} />
-      </mesh>
-      {/* Solar Panels */}
-      <mesh position={[1.5, 0, 0]}>
-        <boxGeometry args={[2, 0.1, 1]} />
-        <meshStandardMaterial color="#1e3a8a" metalness={0.5} roughness={0.5} />
-      </mesh>
-      <mesh position={[-1.5, 0, 0]}>
-        <boxGeometry args={[2, 0.1, 1]} />
-        <meshStandardMaterial color="#1e3a8a" metalness={0.5} roughness={0.5} />
-      </mesh>
-      {/* Antenna */}
-      <mesh position={[0, 0.8, 0]}>
-        <cylinderGeometry args={[0.05, 0.05, 1]} />
-        <meshStandardMaterial color="#94a3b8" />
-      </mesh>
-      <mesh position={[0, 1.3, 0]}>
-        <sphereGeometry args={[0.2]} />
-        <meshStandardMaterial color="#94a3b8" />
-      </mesh>
-    </group>
-  );
-}
-
 
 // --- Game Components ---
 
-function Ring({ position, onPass, onHit }: { position: [number, number, number], onPass: () => void, onHit: () => void }) {
-  const ref = useRef<THREE.Group>(null);
-  const [passed, setPassed] = useState(false);
-
-  useFrame((state) => {
-    if (!ref.current) return;
-    ref.current.position.z += 0.2; // Move ring towards camera
-
-    // Check if ring passed the spaceship (which is roughly at z=5-10)
-    if (!passed && ref.current.position.z > 15) {
-      setPassed(true);
-      // We'll handle scoring in the parent to check if spaceship was inside the ring
-    }
-
-    // Reset ring if it goes too far
-    if (ref.current.position.z > 20) {
-      ref.current.position.z = -100;
-      ref.current.position.x = (Math.random() - 0.5) * 20;
-      ref.current.position.y = (Math.random() - 0.5) * 10;
-      setPassed(false);
-    }
-  });
-
-  return (
-    <group ref={ref} position={position}>
-      <mesh rotation={[0, 0, 0]}>
-        <torusGeometry args={[2, 0.1, 16, 32]} />
-        <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={2} transparent opacity={0.6} />
-      </mesh>
-      {/* Inner glow for better visibility */}
-      <mesh rotation={[0, 0, 0]}>
-        <torusGeometry args={[1.9, 0.05, 8, 16]} />
-        <meshBasicMaterial color="#a5f3fc" transparent opacity={0.3} />
-      </mesh>
-    </group>
-  );
-}
-
-function Spaceship({ onClick, onScoreUpdate, onPositionUpdate }: { 
+function Spaceship({ onClick, onPositionUpdate }: { 
   onClick?: () => void, 
-  onScoreUpdate: (score: number | ((s: number) => number)) => void,
-  onPositionUpdate: (pos: { x: number, y: number }) => void 
+  onPositionUpdate: (pos: { x: number, y: number }) => void,
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
-  const ringsRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
     const handleMove = (e: MouseEvent | TouchEvent) => {
@@ -839,60 +721,24 @@ function Spaceship({ onClick, onScoreUpdate, onPositionUpdate }: {
     if (groupRef.current) {
       const t = clock.getElapsedTime();
       
-      // Mouse influence - more direct control for "game" feel
-      const targetX = mousePos.x * 15;
-      const targetY = mousePos.y * 10;
+      // Idle animation when not in game mode
+      const idleX = Math.sin(t * 0.5) * 8;
+      const idleY = Math.cos(t * 0.3) * 4;
       
-      // Smooth follow
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-      groupRef.current.position.z = 10; // Fixed depth for gameplay
-
-      // Rotation based on movement (banking)
-      groupRef.current.rotation.z = -mousePos.x * 0.8;
-      groupRef.current.rotation.x = mousePos.y * 0.4;
-      groupRef.current.rotation.y = Math.PI + mousePos.x * 0.2;
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, idleX, 0.05);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, idleY, 0.05);
+      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, 5, 0.05);
+      
+      groupRef.current.rotation.z = Math.sin(t * 0.5) * 0.2;
+      groupRef.current.rotation.x = Math.cos(t * 0.3) * 0.2;
+      groupRef.current.rotation.y = Math.PI;
 
       onPositionUpdate({ x: groupRef.current.position.x, y: groupRef.current.position.y });
-
-      // Collision Detection with Rings
-      if (ringsRef.current) {
-        ringsRef.current.children.forEach((ring: any) => {
-          const distance = groupRef.current!.position.distanceTo(ring.position);
-          
-          // If ring is at the same depth as spaceship
-          if (Math.abs(ring.position.z - groupRef.current!.position.z) < 1) {
-            if (distance < 2) {
-              // Passed through ring!
-              if (!ring.userData.scored) {
-                onScoreUpdate(s => s + 1);
-                ring.userData.scored = true;
-              }
-            } else if (distance < 3) {
-              // Hit the ring edge!
-              onScoreUpdate(0);
-            }
-          }
-          
-          // Reset scored flag when ring resets
-          if (ring.position.z < -90) {
-            ring.userData.scored = false;
-          }
-        });
-      }
     }
   });
 
   return (
     <>
-      <group ref={ringsRef}>
-        <Ring position={[0, 0, -20]} onPass={() => {}} onHit={() => {}} />
-        <Ring position={[5, 3, -40]} onPass={() => {}} onHit={() => {}} />
-        <Ring position={[-5, -2, -60]} onPass={() => {}} onHit={() => {}} />
-        <Ring position={[2, -4, -80]} onPass={() => {}} onHit={() => {}} />
-        <Ring position={[-8, 2, -100]} onPass={() => {}} onHit={() => {}} />
-      </group>
-
       <group 
         ref={groupRef}
         onClick={(e) => {
@@ -910,16 +756,6 @@ function Spaceship({ onClick, onScoreUpdate, onPositionUpdate }: {
       >
       {/* Spaceship Model - 90s Star Wars Style (X-Wing silhouette) */}
       <group rotation={[0, Math.PI, 0]} scale={hovered ? 0.6 : 0.5}>
-        {/* Call to Action Prompt */}
-        <Html position={[0, 4, 0]} center distanceFactor={15}>
-          <div className="pointer-events-none select-none flex flex-col items-center gap-1">
-            <div className="bg-cyan-500/20 backdrop-blur-md border border-cyan-500/40 px-3 py-1 rounded-sm text-[8px] text-cyan-300 font-mono animate-pulse whitespace-nowrap uppercase tracking-[0.3em] shadow-[0_0_15px_rgba(34,211,238,0.2)]">
-              [ INTERACT_TO_WARP ]
-            </div>
-            <div className="w-px h-6 bg-gradient-to-b from-cyan-500/50 to-transparent" />
-          </div>
-        </Html>
-
         {/* Main Fuselage (Body) */}
         <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.4, 0.6, 5, 6]} />
@@ -987,7 +823,7 @@ function Spaceship({ onClick, onScoreUpdate, onPositionUpdate }: {
           </mesh>
         </group>
 
-        {/* Engines and Glows */}
+        {/* Engines */}
         {[
           [1, 0.5, -2.5], [-1, 0.5, -2.5], [1, -0.5, -2.5], [-1, -0.5, -2.5]
         ].map((pos, i) => (
@@ -996,79 +832,22 @@ function Spaceship({ onClick, onScoreUpdate, onPositionUpdate }: {
               <cylinderGeometry args={[0.3, 0.3, 1, 6]} />
               <meshStandardMaterial color="#4b5563" flatShading />
             </mesh>
-            <mesh position={[0, 0, -0.6]}>
-              <sphereGeometry args={[0.2, 8, 8]} />
-              <meshBasicMaterial color="#f87171" />
-            </mesh>
-            <pointLight distance={3} intensity={2} color="#ef4444" />
           </group>
         ))}
-
-        {/* Trail */}
-        <Trail width={1.5} length={10} color="#ef4444" attenuation={(t) => t * t}>
-           <mesh position={[0, 0, -2.5]}>
-             <sphereGeometry args={[0.1]} />
-             <meshBasicMaterial color="transparent" opacity={0} />
-           </mesh>
-        </Trail>
       </group>
     </group>
     </>
   );
 }
 
-function Rain() {
-  const count = 1000;
-  const mesh = useRef<THREE.InstancedMesh>(null);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  
-  const particles = useMemo(() => {
-    const temp = [];
-    for(let i = 0; i < count; i++) {
-      const speed = 0.5 + Math.random() * 0.5;
-      const x = (Math.random() - 0.5) * 120;
-      const z = (Math.random() - 0.5) * 120;
-      const y = Math.random() * 100;
-      temp.push({ x, y, z, speed });
-    }
-    return temp;
-  }, []);
-
-  useFrame((state, delta) => {
-    if (!mesh.current) return;
-    
-    particles.forEach((particle, i) => {
-      particle.y -= particle.speed * 2; // Fall down
-      if (particle.y < 0) {
-        particle.y = 100; // Reset to top
-      }
-
-      dummy.position.set(particle.x, particle.y, particle.z);
-      dummy.scale.set(1, 1 + Math.random() * 2, 1);
-      dummy.updateMatrix();
-      mesh.current.setMatrixAt(i, dummy.matrix);
-    });
-    mesh.current.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, count]} position={[0, 20, 0]}>
-      <boxGeometry args={[0.05, 1.5, 0.05]} />
-      <meshBasicMaterial color="#a5f3fc" transparent opacity={0.3} />
-    </instancedMesh>
-  );
-}
-
-
-export default function Background3D({ onSpaceshipClick, onScoreUpdate, onPositionUpdate }: { 
+export default function Background3D({ onSpaceshipClick, onPositionUpdate }: { 
   onSpaceshipClick?: () => void,
-  onScoreUpdate: (score: number | ((s: number) => number)) => void,
-  onPositionUpdate: (pos: { x: number, y: number }) => void 
+  onPositionUpdate: (pos: { x: number, y: number }) => void,
 }) {
   return (
     <>
       <div className="fixed inset-0 -z-10">
-        <Canvas>
+        <Canvas dpr={[1, 1.5]}>
           <PerspectiveCamera makeDefault position={[0, 0, 15]} />
           <SceneController />
           <ambientLight intensity={0.6} />
@@ -1077,19 +856,14 @@ export default function Background3D({ onSpaceshipClick, onScoreUpdate, onPositi
           {/* Space Elements */}
           <group>
             <BlackHole />
-            <Comet />
-            <Comet />
-            <Comet />
-            <Comet />
+            {/* Comets removed for performance */}
             <MainPlanet />
             <RedPlanet />
             <IcePlanet />
             <PurplePlanet />
             <OrangePlanet />
-            <Stars radius={100} depth={50} count={6000} factor={4} saturation={0} fade speed={1} />
-            <Sparkles count={200} scale={30} size={2} speed={0.4} opacity={0.5} color="#ffffff" />
-            
-            <Satellite />
+            <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade speed={1} />
+            <Sparkles count={30} scale={30} size={2} speed={0.4} opacity={0.5} color="#ffffff" />
           </group>
 
           {/* Earth Elements */}
@@ -1098,21 +872,14 @@ export default function Background3D({ onSpaceshipClick, onScoreUpdate, onPositi
             <EarthSphere />
             <Fireflies />
             
-            {/* Clouds - More layers for depth */}
-            {/* High altitude clouds for atmosphere entry */}
-            <Cloud position={[0, -80, -20]} opacity={0.1} speed={0.4} segments={10} color="#bfdbfe" />
-            
-            <Cloud position={[-15, -105, -40]} opacity={0.5} speed={0.2} segments={20} color="#ffffff" />
-            <Cloud position={[15, -100, -45]} opacity={0.5} speed={0.2} segments={20} color="#ffffff" />
-            <Cloud position={[0, -95, -35]} opacity={0.3} speed={0.1} segments={20} color="#ffffff" />
-            {/* Low lying mist */}
-            <Cloud position={[0, -118, -30]} opacity={0.2} speed={0.05} segments={10} color="#e0f2fe" />
+            {/* Clouds - Simplified for performance */}
+            <Cloud position={[0, -80, -20]} opacity={0.1} speed={0.4} segments={2} color="#bfdbfe" />
+            <Cloud position={[-15, -105, -40]} opacity={0.4} speed={0.2} segments={3} color="#ffffff" />
+            <Cloud position={[15, -100, -45]} opacity={0.4} speed={0.2} segments={3} color="#ffffff" />
 
             {/* Birds */}
             <Bird position={[0, -105, -20]} speed={1.2} />
             <Bird position={[5, -102, -25]} speed={1.1} offset={1} />
-            <Bird position={[-5, -108, -22]} speed={1.3} offset={2} />
-            <Bird position={[10, -100, -30]} speed={1.0} offset={3} />
           </group>
 
           <fog attach="fog" args={['#020617', 10, 100]} />
@@ -1122,6 +889,7 @@ export default function Background3D({ onSpaceshipClick, onScoreUpdate, onPositi
       {/* Foreground Overlay Canvas for Spaceship and Falling Star */}
       <div className="fixed inset-0 z-50 pointer-events-none">
         <Canvas 
+          dpr={[1, 1.5]}
           style={{ pointerEvents: 'none' }} 
           eventSource={typeof document !== 'undefined' ? document.body : undefined}
         >
@@ -1130,7 +898,6 @@ export default function Background3D({ onSpaceshipClick, onScoreUpdate, onPositi
           <pointLight position={[10, 10, 10]} intensity={1} />
           <Spaceship 
             onClick={onSpaceshipClick} 
-            onScoreUpdate={onScoreUpdate}
             onPositionUpdate={onPositionUpdate}
           />
         </Canvas>

@@ -103,7 +103,6 @@ const SnapchatIcon = ({ size = 24, className = "" }: { size?: number, className?
 
 function App() {
   const { playHover, playClick } = useSoundEffects();
-  const [score, setScore] = useState(0);
   const [altitude, setAltitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
 
@@ -284,8 +283,7 @@ function App() {
   return (
     <div className="min-h-screen relative overflow-x-hidden bg-[#020617] font-sans">
       <Background3D 
-        onSpaceshipClick={scrollToRandomLink} 
-        onScoreUpdate={setScore}
+        onSpaceshipClick={scrollToRandomLink}
         onPositionUpdate={(pos) => {
           setAltitude(Math.round(pos.y * 100));
           setLongitude(Math.round(pos.x * 100));
@@ -293,8 +291,8 @@ function App() {
       />
       
       {/* Game HUD Overlay */}
-      <div className="hud-overlay" />
-      <div className="scanline" />
+      <div className="hud-overlay pointer-events-none" />
+      <div className="scanline pointer-events-none" />
       
       {/* HUD Corners */}
       <div className="fixed top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-cyan-500/40 z-[110] pointer-events-none" />
@@ -304,16 +302,15 @@ function App() {
 
       {/* System Status Bar */}
       <div className="fixed top-6 left-20 right-20 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent z-[110] hidden md:block">
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-8 font-mono text-[10px] text-cyan-400/60 tracking-[0.3em] uppercase">
-          <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" /> SYSTEM_ONLINE</span>
-          <span>SCORE: {score}</span>
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-8 font-mono text-[10px] text-cyan-400/60 tracking-[0.3em] uppercase whitespace-nowrap">
+          <span className="flex items-center gap-2 pr-4"><span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" /> SYSTEM_ONLINE</span>
           <span>ALT: {altitude}M</span>
           <span>LON: {longitude}M</span>
           <span>PILOT: NOOR_HASSAN</span>
         </div>
       </div>
-
-      <main className="relative z-10 container mx-auto px-4 py-16 flex flex-col items-center">
+      
+      <main className="relative z-10 container mx-auto px-4 py-16 flex flex-col items-center transition-all duration-700 opacity-100 scale-100">
         {/* Header Section */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
@@ -354,7 +351,7 @@ function App() {
             </motion.h1>
             <div className="flex items-center justify-center gap-4">
               <div className="h-px w-12 bg-gradient-to-r from-transparent to-cyan-500/50" />
-              <div className="px-6 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] md:text-xs font-mono font-bold tracking-[0.4em] uppercase backdrop-blur-md">
+              <div className="px-6 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] md:text-xs font-mono font-bold tracking-[0.4em] uppercase">
                   LEVEL 21 • ARCHITECT
               </div>
               <div className="h-px w-12 bg-gradient-to-l from-transparent to-cyan-500/50" />
@@ -365,7 +362,7 @@ function App() {
         <motion.div 
           whileHover={{ scale: 1.01 }}
           onMouseEnter={playHover}
-          className="bg-slate-950/60 backdrop-blur-2xl border border-cyan-500/20 rounded-none p-8 text-cyan-100 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden mb-20 w-full max-w-md"
+          className="bg-slate-950/80 backdrop-blur-sm border border-cyan-500/20 rounded-none p-8 text-cyan-100 shadow-[0_0_20px_rgba(0,0,0,0.3)] relative overflow-hidden mb-20 w-full max-w-md"
           style={{
             clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)"
           }}

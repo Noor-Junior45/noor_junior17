@@ -44,19 +44,19 @@ const SocialButton = memo(({ icon: Icon, label, username, href, color = "bg-whit
         scale: 1.02, 
         rotateX: 2, 
         rotateY: -2,
-        z: 20,
-        boxShadow: "0px 0px 30px rgba(34,211,238,0.3), 0px 0px 15px rgba(34,211,238,0.2)" 
+        z: 20
       }}
       whileTap={{ scale: 0.98 }}
       className={`
         relative group flex items-center p-4 mb-4
-        backdrop-blur-md border border-cyan-500/30
+        border border-cyan-500/30
         shadow-[0_0_20px_rgba(0,0,0,0.8)]
         hover:border-cyan-400
+        hover:shadow-[0_0_30px_rgba(34,211,238,0.2)]
         transition-all duration-200 ease-out
         w-full max-w-md mx-auto
         overflow-hidden
-        bg-slate-950/80
+        bg-slate-950/90
         glitch-hover
       `}
       style={{
